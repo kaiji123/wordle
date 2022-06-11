@@ -1,0 +1,31 @@
+.main{
+    background-color: red;
+    height: 500;
+    width: 1000;
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: repeat(5, 1fr);  
+
+}
+.letter{
+    background-color: yellow;
+    width: 64px;
+    height: 64px;
+    margin :10px;
+    justify-content: center;
+
+}
+.letter div{
+    margin-left: 23px;
+    margin-top: 16px;
+    font-size: 25px
+}
+
+.ui{
+    margin-top: 20px
+}
+.ui button{
+    height: 100px;
+    width : 180px;
+    font-size: 30px;
+}

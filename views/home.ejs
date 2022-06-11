@@ -1,0 +1,154 @@
+<head>
+    <link rel='stylesheet' href='/styles/style.css' />
+</head>
+
+<body>
+
+    <div class="main" id="frame">
+    </div>
+    <div class="ui">
+        <button id="restart">Restart</button>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+    let va = 0;
+    let letter_i = 1;
+    let word;
+    chooseWord();
+    console.log("the chosen word is" + word)
+    let wordlen = 0;
+    let typed_word = "";
+    let button = document.getElementById('restart')
+    let res
+    button.onclick = restart
+
+
+    document.addEventListener('keyup', (e) => {
+        //console.log(e)
+        const el = document.querySelector('#frame :nth-child(' + letter_i + ')');
+        //console.log(el)
+        //console.log(e.key)
+       
+
+        let char = e.key
+        if (char.toUpperCase() != char.toLowerCase() && char.length == 1){
+            console.log(char.toUpperCase() + " " + char.toLowerCase())
+            let dive = document.createElement('div')
+            dive.innerHTML = e.key
+            el.appendChild(dive)
+            typed_word = typed_word + e.key;
+            if (typed_word.length == word.length) {
+                checkWord(typed_word, word, letter_i);
+                typed_word = ""
+            }
+            letter_i = letter_i + 1
+            console.log(word)
+            
+        }
+      
+
+    })
+
+
+
+    function checkWord(typed_word, word, letter_i) {
+        console.log(typed_word + word)
+
+        var start = letter_i - word.length + 1
+        console.log(start)
+        let correct = 0
+        for (let i = 0; i < wordlen; i++) {
+            let index = start + i
+            let el = document.querySelector('#frame :nth-child(' + index + ')')
+            if (typed_word[i] == word[i]) {
+                el.style.backgroundColor = "green"
+                correct = correct + 1
+                if (correct == word.length) {
+                    console.log("win")
+                    var myCanvas = document.getElementById('frame');
+
+                    var myConfetti = confetti.create(myCanvas, {
+                        resize: true,
+                        useWorker: true
+                    });
+                    myConfetti({
+                        particleCount: 100,
+                        spread: 160
+                        // any other options from the global
+                        // confetti function
+                    });
+                    myConfetti();
+                    setTimeout(restart, 2000)
+                }
+            }
+            else {
+                if (word.includes(typed_word[i]) == true) {
+                    console.log("exists")
+                    el.style.backgroundColor = "orange"
+                }
+                if (letter_i == 5 * word.length) {
+                    letter_i = letter_i + 1 // this is to avoid race condition because of the event listener might fire multiple time
+                    console.log("yes")
+                    res =setTimeout(restart, 2000)
+                }
+            }
+        }
+
+    }
+    async function chooseWord() {
+        // search from database
+
+        fetch('http://localhost:8000/random', {
+            method: 'GET', // or 'PUT'
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => response.json())
+            .then(w => {
+                // change the global variable word in fetch to the chosen word
+                word = w
+                wordlen = w.length
+                
+                makeSquares(w)
+                //console.log(word);
+                return w
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+
+    }
+
+    function makeSquares(word) {
+
+        var frame = document.getElementById('frame')
+        console.log(word)
+        console.log(word.length)
+        // change frames grids based on words length
+        frame.style.gridTemplateColumns = "repeat(" + word.length + ",1fr)"
+        for (let i = 0; i < 5; i++) {
+            for (let x = 0; x < word.length; x++) {
+                var div = document.createElement("div")
+                div.classList.add("letter")
+                frame.appendChild(div)
+            }
+        }
+    }
+
+
+    // restart the game
+    function restart() {
+        alert("The answer is "+ word)
+        clearTimeout(res)
+        console.log("restarting")
+        let frame = document.getElementById("frame")
+        frame.innerHTML = ""
+        letter_i = 1;
+        chooseWord();
+    }
+
+</script>
